@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# Copyright 2016 Chris Pavlina <pavlina.chris@gmail.com>
+
+if ARGV.size != 2
+  print "Usage: #{$0} keyfile passfile\n"
+  exit(1)
+end
+
+require 'open3'
+
+keyfile = ARGV[0]
+passfile = ARGV[1]
+pass = File.read(passfile).strip
+
+Open3.popen3("/usr/bin/expect") do |i,o,e,t|
+  i.puts("spawn ssh-add #{keyfile}")
+  i.puts("expect \"Enter passphrase\"")
+  i.puts("send \"#{pass}\\r\"")
+  i.puts("expect eof")
+  i.close
+
+  exit_status = t.value
+  if not exit_status.success?
+    print "\nFailed\n"
+    exit(exit_status.exitstatus)
+  else
+    print "\nSuccess\n"
+  end
+end

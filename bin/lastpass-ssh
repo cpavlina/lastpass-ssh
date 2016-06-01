@@ -83,6 +83,8 @@ else
 			ENV["KEY_ID"] = key_id
 			ENV["SSH_ASKPASS"] = fn_abs
 			ENV["DISPLAY"] = "foo"
+			exit 1 if key_name == "id"
+			exit 1 if not File.exist?(g_keys_path + "/" + key_name)
 			print "LastPass key ID #{key_id} name #{key_name} "
 			if key_name =~ /^lpass_/ then
 				key_body = `lpass show --notes #{key_id}`
@@ -91,7 +93,7 @@ else
 						"'#{key_name}' is empty (no key defined)!\n"
 					exit 1
 				end
-				exec "lpass show --notes #{key_id} | ssh-add -"
+				exec "lpass show --notes #{key_id} | ssh-add-pfile #{g_keys_path}/#{key_name} /dev/stdin"
 			else
 				exec "ssh-add #{g_keys_path}/#{key_name} < /dev/null"
 			end
